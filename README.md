@@ -32,23 +32,6 @@ age-prediction-project/
 - `DRQSPREP`: Dietary Preparedness
 
 ---
-
-## ✅ How to Run
-```bash
-# Clone repo
-https://github.com/yourusername/age-prediction-project.git
-cd age-prediction-project
-
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install requirements
-pip install -r requirements.txt
-
-# Run the app
-cd streamlit_app
-streamlit run app.py
 ```
 
 ---
