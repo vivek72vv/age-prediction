@@ -1,35 +1,41 @@
-
 import streamlit as st
-import pickle
+import pandas as pd
 import numpy as np
+import joblib
 
-# Load trained model
-model = pickle.load(open("../models/model.pkl", "rb"))
+# Load saved model pipeline
+model = joblib.load("model.pkl")
 
 # Streamlit UI
-st.set_page_config(page_title="Age Group Prediction", layout="centered")
-st.title("🧠 Age Group Prediction (Adult or Senior)")
-st.write("Enter your health and nutrition metrics to predict your age group.")
+st.set_page_config(page_title="Age Group Predictor", layout="centered")
+st.title("🧠 Age Group Prediction from Nutrition Survey")
 
-# Sidebar for user input
-st.sidebar.header("Input Parameters")
+st.write("Fill in the details below to predict whether the person is an **Adult** or **Senior**.")
 
-def user_input_features():
-    GLU = st.sidebar.slider("GLU - Glucose Level", 0.0, 300.0, 120.0)
-    INS = st.sidebar.slider("INS - Insulin Level", 0.0, 300.0, 90.0)
-    BMI = st.sidebar.slider("BMI - Body Mass Index", 10.0, 50.0, 24.0)
-    PAQ605 = st.sidebar.slider("PAQ605 - Physical Activity Frequency", 1, 4, 2)
-    PAD680 = st.sidebar.slider("PAD680 - Daily Activity Level", 1, 3, 1)
-    DRQSPREP = st.sidebar.slider("DRQSPREP - Food Preparation Frequency", 1, 6, 3)
-    features = np.array([[GLU, INS, BMI, PAQ605, PAD680, DRQSPREP]])
-    return features
+# Define input fields (should match the model's training features)
+lbxglu = st.number_input("Glucose (LBXGLU)", min_value=0.0, step=0.1)
+lbxin = st.number_input("Insulin (LBXIN)", min_value=0.0, step=0.1)
+bmxbmi = st.number_input("BMI (BMXBMI)", min_value=0.0, step=0.1)
+ridageyr = st.number_input("Age (RIDAGEYR)", min_value=0)
+riagendr = st.selectbox("Gender (RIAGENDR)", ["Male", "Female"])
+dmdeduc2 = st.selectbox("Education Level (DMDEDUC2)", [1, 2, 3, 4, 5, 7, 9])  # You can customize labels
+dmdmartl = st.selectbox("Marital Status (DMDMARTL)", [1, 2, 3, 4, 5, 6, 77, 99])  # Customize if needed
 
-input_data = user_input_features()
+if st.button("Predict Age Group"):
+    # Create input DataFrame
+    input_data = pd.DataFrame({
+        'lbxglu': [lbxglu],
+        'lbxin': [lbxin],
+        'bmxbmi': [bmxbmi],
+        'ridageyr': [ridageyr],
+        'riagendr': [riagendr],
+        'dmdeduc2': [dmdeduc2],
+        'dmdmartl': [dmdmartl],
+    })
 
-# Prediction
-prediction = model.predict(input_data)
+    # Make prediction
+    prediction = model.predict(input_data)[0]
 
-# Output
-st.subheader("Prediction")
-label = "Senior (1)" if prediction[0] == 1 else "Adult (0)"
-st.success(f"Predicted Age Group: **{label}**")
+    # Map back to label
+    label = "Adult" if prediction == 0 else "Senior"
+    st.success(f"🧾 Predicted Age Group: **{label}**")
